@@ -1,7 +1,8 @@
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
+        let serviceWorkerPath='../serviceWorker.js';
       navigator.serviceWorker
-        .register('../serviceWorker.js')
+        .register(serviceWorkerPath)
         .then(registration => console.log('service worker registered', registration.scope))
         .catch(error => console.log('service worker not registered', error))
     })
