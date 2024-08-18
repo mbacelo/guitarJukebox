@@ -1,13 +1,11 @@
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-        let serviceWorkerPath='../serviceWorker.js';
-      navigator.serviceWorker
-        .register(serviceWorkerPath)
-        .then(registration => console.log('service worker registered', registration.scope))
-        .catch(error => console.log('service worker not registered', error))
+        navigator.serviceWorker
+            .register('serviceWorker.js')
+            .then(registration => console.log('service worker registered', registration.scope))
+            .catch(error => console.log('service worker not registered', error))
     })
-  }
-
+}
 
 let songs;
 const sortKeys = ['band', 'title'];
