@@ -1,6 +1,7 @@
 {
   "name": "Guitar Jukebox",
-  "short_name": "Jukebox",  
+  "short_name": "Jukebox",
+  "id": "/",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#fdfdfd",

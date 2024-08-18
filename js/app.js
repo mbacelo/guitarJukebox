@@ -1,3 +1,13 @@
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker
+        .register('../serviceWorker.js')
+        .then(registration => console.log('service worker registered', registration.scope))
+        .catch(error => console.log('service worker not registered', error))
+    })
+  }
+
+
 let songs;
 const sortKeys = ['band', 'title'];
 let currentSortKey = sortKeys[0];

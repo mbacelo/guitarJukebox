@@ -1,32 +1,34 @@
-const staticGuitarJukebox = "guitar-jukebox-site-v1.0"
-const assets = [
-  "/",
-  "/index.html",
-  "/css/style.css",
-  "/js/app.js",
+const cacheName = 'guitar-jukebox-site-v1.0'
+const resourcesToPrecache = [  
+  'index.html',
+  'css/style.css',
+  'js/app.js'
 ]
 
-self.addEventListener("install", installEvent => {
+self.addEventListener('install', installEvent => {
   installEvent.waitUntil(
-    caches.open(staticGuitarJukebox).then(cache => {
-      cache.addAll(assets)
+    caches.open(cacheName).then(cache => {
+      cache.addAll(resourcesToPrecache)
     })
   )
 })
 
-self.addEventListener("fetch", fetchEvent => {
-  fetchEvent.respondWith(
-    caches.match(fetchEvent.request).then(res => {
-      return res || fetch(fetchEvent.request)
-    })
-  )
-})
+//The stale-while-revalidate strategy serves the cached resource immediately while simultaneously fetching the latest version from the network. 
+//The cache is updated with the new response. This approach ensures that users get fast responses and that the cache stays up to date.
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(cachedResponse => {      
+      // Start a network request in the background
+      const networkFetch = fetch(event.request).then(networkResponse => {
+        // Update the cache with the new response
+        return caches.open(cacheName).then(cache => {
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        });
+      });
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function() {
-    navigator.serviceWorker
-      .register("/serviceWorker.js")
-      .then(res => console.log("service worker registered"))
-      .catch(err => console.log("service worker not registered", err))
-  })
-}
+      // Return the cached response immediately, or wait for network if not cached
+      return cachedResponse || networkFetch;
+    })
+  );
+});
