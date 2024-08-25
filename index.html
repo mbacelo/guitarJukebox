@@ -8,8 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="manifest.json" />    
+    <link rel="manifest" href="manifest.json" />
+
     <meta name="description" content="Guitar Jukebox - Curated songs list to play">
+    <meta name="keywords" content="songs, guitar, chords, tabs">
+    <meta name="author" content="Marcos Bacelo">
     <title>Guitar Jukebox</title>
 </head>
 
@@ -20,36 +23,36 @@
     <main>
         <section class="filter">
             <div>
-                <label for="language">Language:</label>
-                <select id="language">
+                <label for="language-filter">Language:</label>
+                <select id="language-filter" class="filter-selector">
                     <option value="">All</option>
                 </select>
             </div>
             <div>
-                <label for="band">Band:</label>
-                <select id="band">
+                <label for="band-filter">Band:</label>
+                <select id="band-filter" class="filter-selector">
                     <option value="">All</option>
                 </select>
             </div>
             <div>
-                <label for="search">Song Title:</label>
-                <input type="text" id="search" placeholder="Enter song title">
+                <label for="title-search">Song Title:</label>
+                <input type="search" id="title-search" placeholder="Enter song title" class="filter-selector">
             </div>
         </section>
-        <section class="random-song-container">
-            <button id="random-song-btn" class="random-song-btn">Pick a Random Song</button>
-            <div id="random-song-display" class="random-song-display"></div>
+        <section class="random-song-section">
+            <button id="random-song-button" class="random-song-button">Pick a Random Song</button>
+            <div id="random-song-container" class="random-song-container"></div>
         </section>
         <section class="table-container">
-            <div id="loader" class="loader">
+            <div id="loader" class="song-list-loader">
                 <div class="loader-spinner"></div>
                 <h3>Loading songs...</h3>
             </div>
             <table>
                 <thead>
                     <tr id="songs-list-header">
-                        <th id="sort-band">Band <span class="sort-indicator sort-asc"></span></th>
-                        <th id="sort-title">Song Title <span class="sort-indicator"></span></th>
+                        <th id="band-header">Band <span class="sort-indicator sort-asc"></span></th>
+                        <th id="title-header">Song Title <span class="sort-indicator"></span></th>
                     </tr>
                 </thead>
                 <tbody id="song-list">
@@ -62,10 +65,14 @@
     <!-- Tippy.js JS -->
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
-    <script src="js/app.js"></script>
-    <script>
-        // Initial population of filter options and display of all songs
-        loadSongs();
+
+    <!-- Load the JavaScript files -->
+    <script type="module" src="js/dom-utils.js"></script>
+    <script type="module" src="js/api-utils.js"></script>
+    <script type="module" src="js/event-handlers.js"></script>
+    <script type="module">
+        import { initApp } from './js/event-handlers.js';
+        initApp();
     </script>
 </body>
 

@@ -1,15 +1,24 @@
+:root {
+    --main-font-size: 1em;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
     background-color: #f4f4f4;
     color: #333;
-    font-size: 1em;
+    font-size: var(--main-font-size);
+    font-family: 'Roboto', sans-serif;
 }
 
 h1 {
     text-align: center;
     color: #444;
     font-size: 2em;
+}
+
+a {
+    color: darkblue;
 }
 
 .filter {
@@ -30,7 +39,7 @@ input {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 1em;
+    font-size: var(--main-font-size);
 }
 
 .table-container {
@@ -87,18 +96,24 @@ tr:nth-child(even) {
     content: '▼';
 }
 
-#band {
+.filter-selector {
     max-width: 200px;
 }
 
-.random-song-container {
+.random-song-section {
     text-align: center;
-    margin-top: 20px;
 }
 
-.random-song-btn {
+.random-song-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.random-song-button {
     padding: 15px 20px;
-    font-size: 1em;
+    font-size: var(--main-font-size);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
     font-weight: bold;
     color: #fff;
@@ -109,17 +124,10 @@ tr:nth-child(even) {
     transition: background-color 0.3s ease;
 }
 
-.random-song-btn:hover {
+.random-song-button:hover {
     background-color: #0056b3;
 }
 
-.random-song-display {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #333;
-}
 
 .hidden {
     display: none;
@@ -146,7 +154,7 @@ tr:nth-child(even) {
     animation: fadeInScale 1s ease-in-out;
 }
 
-.loader {
+.song-list-loader {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -164,7 +172,7 @@ tr:nth-child(even) {
 }
 
 .app-icon {
-    color:chocolate;
+    color: chocolate;
 }
 
 @keyframes spin {
@@ -178,15 +186,34 @@ tr:nth-child(even) {
 }
 
 /* Responsive adjustments */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     h1 {
         font-size: 1.5em;
         /* Slightly decrease font size for better fit */
     }
 
     .filter {
+        display: flex;
         flex-direction: column;
-        /* Stack filters vertically on small screens */
+        gap: 10px;
+        /* space between fields */
+    }
+
+    .filter>div {
+        display: flex;
+        align-items: center;
+    }
+
+    .filter label {
+        flex: 0 0 100px;
+        /* Adjust the width of the label */
+        margin-right: 10px;
+        /* space between label and selector */
+    }
+
+    .filter-selector {
+        max-width: unset;
+        width: 100%;
     }
 
     label {
@@ -194,16 +221,12 @@ tr:nth-child(even) {
         margin-bottom: 5px;
     }
 
-    input {
-        width: 90%;
-    }
-
     th,
     td {
         padding: 10px;
     }
 
-    .random-song-btn {
+    .random-song-button {
         padding: 10px 15px;
     }
 }
