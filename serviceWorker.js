@@ -1,8 +1,10 @@
 const cacheName = 'guitar-jukebox-site-v1.0'
-const resourcesToPrecache = [  
+const resourcesToPrecache = [
   'index.html',
   'css/style.css',
-  'js/app.js'
+  'js/app-utils.js',
+  'js/dom-utils.js',
+  'js/event-handlers.js'
 ]
 
 self.addEventListener('install', installEvent => {
