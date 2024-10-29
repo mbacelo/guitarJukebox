@@ -20,9 +20,10 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       // Return the cached response if found
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      // ## remove cache to test new analytics
+      // if (cachedResponse) {
+      //   return cachedResponse;
+      // }
 
       // Otherwise, fetch from the network
       return fetch(event.request).then(networkResponse => {
