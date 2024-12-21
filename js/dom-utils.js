@@ -1,12 +1,26 @@
-const randomSongsHistory = [];
+export const DOM = {
+    songList: document.getElementById('song-list'),
+    randomSongContainer: document.getElementById('random-song-container'),
+    randomSongButton: document.getElementById('random-song-button'),
+    loader: document.getElementById('loader'),
+    filters: {
+        language: document.getElementById('language-filter'),
+        band: document.getElementById('band-filter'),
+        title: document.getElementById('title-search')
+    },
+    headers: {
+        band: document.getElementById('band-header'),
+        title: document.getElementById('title-header'),
+        headerRow: document.getElementById('songs-list-header')
+    }
+};
 
 /**
  * Update the list of songs displayed on the page.
  * @param {Array<{band: string, title: string, url: string, notes?: string}>} songs - Array of song objects.
  */
 export function updateSongList(songs) {
-    const songList = document.getElementById('song-list');
-    songList.innerHTML = ''; // Clear current list
+    DOM.songList.innerHTML = ''; // Clear current list
     const fragment = document.createDocumentFragment();
 
     songs.forEach(song => {
@@ -29,17 +43,15 @@ export function updateSongList(songs) {
         if (song.notes) {
             const songNotes = document.createElement('i');
             songLinkCell.appendChild(songNotes);
-            songNotes.outerHTML = `<i class="fas fa-info-circle tooltip-icon" data-tippy-content="${song.notes}"></i>`;
+            songNotes.outerHTML = `<i class='fas fa-info-circle tooltip-icon' data-tippy-content='${song.notes}'></i>`;
         }
 
         tr.appendChild(songLinkCell);
-        fragment.appendChild(tr);        
+        fragment.appendChild(tr);
     });
 
-    songList.appendChild(fragment);
-
-    const randomSongContainer = document.getElementById('random-song-container');
-    randomSongContainer.innerHTML = '';
+    DOM.songList.appendChild(fragment);
+    DOM.randomSongContainer.innerHTML = '';
 
     //Initialize tooltip configuration for each song note
     initializeTooltip('.tooltip-icon');
@@ -53,8 +65,8 @@ function initializeTooltip(selector, options = {}) {
     });
 }
 
-export function toggleLoader(show) {
-    document.getElementById('loader').style.display = show ? 'block' : 'none';
+export function toggleLoader(isLoading) {
+    DOM.loader.style.display = isLoading ? 'block' : 'none';
 }
 
 /**
@@ -65,30 +77,21 @@ export function displayRandomSong(songs) {
     const filteredSongs = getFilteredSongs(songs);
     if (filteredSongs.length > 0) {
 
-        let randomIndex, randomSong;
-        let attemptsCounter = 0;
-        do {
-            randomIndex = Math.floor(Math.random() * filteredSongs.length);
-            randomSong = filteredSongs[randomIndex];
-            attemptsCounter++;
-        } while (randomSongsHistory.includes(randomSong.url) && attemptsCounter < filterSongs.length)
+        const randomSong = getRandomSong(filteredSongs, songs);
 
-        randomSongsHistory.push(randomSong.url);
-
-        const randomSongContainer = document.getElementById('random-song-container');
         // Remove the animation class
-        randomSongContainer.classList.remove('random-song-animation');
+        DOM.randomSongContainer.classList.remove('random-song-animation');
         // Force a reflow to restart the animation
-        void randomSongContainer.offsetWidth;
+        void DOM.randomSongContainer.offsetWidth;
         // Add the random song and the animation class back
-        let tooltipHTML = "";
+        let tooltipHTML = '';
         if (randomSong.notes) {
-            tooltipHTML = `<i class="fas fa-info-circle tooltip-icon" id="note-tooltip-random-song" data-tippy-content="${randomSong.notes}"></i>`;
+            tooltipHTML = `<i class='fas fa-info-circle tooltip-icon' id='note-tooltip-random-song' data-tippy-content='${randomSong.notes}'></i>`;
         }
 
-        randomSongContainer.innerHTML = `<a href="${randomSong.url}" target="_blank">${randomSong.title} - ${randomSong.band}</a>${tooltipHTML}`;
+        DOM.randomSongContainer.innerHTML = `<a href='${randomSong.url}' target='_blank'>${randomSong.title} - ${randomSong.band}</a>${tooltipHTML}`;
 
-        randomSongContainer.classList.add('random-song-animation');
+        DOM.randomSongContainer.classList.add('random-song-animation');
 
         tippy('#note-tooltip-random-song', {
             placement: 'bottom-end',
@@ -108,9 +111,9 @@ export function filterSongs(songs) {
 }
 
 function getFilteredSongs(songs) {
-    const titleSearchValue = document.getElementById('title-search').value.toLowerCase();
-    const bandFilterValue = document.getElementById('band-filter').value;
-    const languageFilterValue = document.getElementById('language-filter').value;
+    const titleSearchValue = DOM.filters.title.value.toLowerCase();
+    const bandFilterValue = DOM.filters.band.value;
+    const languageFilterValue = DOM.filters.language.value;
 
     const filteredSongs = songs.filter(song => {
         const matchesTitleSearch = !titleSearchValue || song.title.toLowerCase().includes(titleSearchValue);
@@ -132,23 +135,20 @@ export function populateFilterOptions(songs) {
 }
 
 export function updateBandFilter(songs) {
-    const bandFilter = document.getElementById('band-filter');
-    const languageFilter = document.getElementById('language-filter');
-    const language = languageFilter.value;
+    const language = DOM.filters.language.value;
 
     const uniqueBands = getUniqueValues(songs, 'band').filter(band => {
         return language === '' || songs.find(song => song.band === band && song.language === language);
     });
     uniqueBands.sort();
 
-    populateOptions(bandFilter, uniqueBands);
+    populateOptions(DOM.filters.band, uniqueBands);
 }
 
 function updateLanguageFilter(songs) {
-    const languageFilter = document.getElementById('language-filter');
     const uniqueLanguages = getUniqueValues(songs, 'language');
     uniqueLanguages.sort();
-    populateOptions(languageFilter, uniqueLanguages);
+    populateOptions(DOM.filters.language, uniqueLanguages);
 }
 
 
@@ -164,4 +164,40 @@ function populateOptions(selectElement, list) {
 
 function getUniqueValues(objectList, key) {
     return [...new Set(objectList.map(entity => entity[key]))];
+}
+
+function getRandomSong(filteredSongs, fullSongsList) {
+    const returnedSongsUrlsKey = 'returnedSongsUrls'; // Key for localStorage
+    let returnedSongsUrls = JSON.parse(localStorage.getItem(returnedSongsUrlsKey)) || [];
+
+    // If all songs have been returned, reset the returned songs list, and start again
+    if (returnedSongsUrls.length === fullSongsList.length) {
+        returnedSongsUrls = [];
+    }
+
+    // Find the remaining items
+    //let remainingSongs = filteredSongs.filter(song => !returnedSongsUrls.includes(song.url));
+    let remainingSongs = filteredSongs.filter(song => {
+        let result = !returnedSongsUrls.includes(song.url);
+        return result;
+    });
+
+    // If there are no new songs to display, but the list is filtered, display any song from the filtered list
+    let trackSong = true;
+    if (remainingSongs.length === 0 && filteredSongs.length < fullSongsList.length) {
+        remainingSongs = filteredSongs;
+        trackSong = false;
+    }
+
+    // Pick a random item from the remaining items
+    const randomIndex = Math.floor(Math.random() * remainingSongs.length);
+    const randomSong = remainingSongs[randomIndex];
+
+    if (trackSong) {
+        // Update the used items list
+        returnedSongsUrls.push(randomSong.url);
+        localStorage.setItem(returnedSongsUrlsKey, JSON.stringify(returnedSongsUrls));
+    }
+
+    return randomSong;
 }

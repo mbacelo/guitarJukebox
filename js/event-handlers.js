@@ -1,9 +1,9 @@
-import { fetchSongs } from './api-utils.js';
-import { updateSongList, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs } from './dom-utils.js';
+import { fetchSongs } from './api.js';
+import { DOM, updateSongList, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs } from './dom-utils.js';
 
 const sortKeys = ['band', 'title'];
 let currentSortKey = sortKeys[0];
-let currentSortDirection = "asc";
+let currentSortDirection = 'asc';
 
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -30,7 +30,7 @@ export async function initApp() {
         setupEventListeners(songs);
     } catch (error) {
         console.error('Error fetching songs:', error)
-        alert('There was an error loading the songs.');
+        displayErrorMessage('There was an error loading the songs. Please try again later.');
     }
     finally {
         toggleLoader(false);
@@ -38,26 +38,27 @@ export async function initApp() {
 }
 
 /**
+ * Display an error message on the page.
+ * @param {string} message - The error message to display.
+ */
+function displayErrorMessage(message) {
+    DOM.songList.innerHTML = `<tr><td colspan='2' style='text-align: center; color: red;'>${message}</td></tr>`;
+}
+
+/**
  * Set up event listeners for the application.
  * @param {Array} songs - Array of song objects.
  */
 function setupEventListeners(songs) {
-    const languageFilter = document.getElementById('language-filter');
-    const bandFilter = document.getElementById('band-filter');
-    const titleSearchInput = document.getElementById('title-search');
-    const randomSongButton = document.getElementById('random-song-button');
-    const bandHeader = document.getElementById('band-header');
-    const titleHeader = document.getElementById('title-header');
-
-    bandFilter.addEventListener('change', () => filterSongs(songs));
-    languageFilter.addEventListener('change', () => {
+    DOM.filters.band.addEventListener('change', () => filterSongs(songs));
+    DOM.filters.language.addEventListener('change', () => {
         updateBandFilter(songs);
         filterSongs(songs);
     });
-    titleSearchInput.addEventListener('input', debounce(() => filterSongs(songs), 300));
-    randomSongButton.addEventListener('click', () => displayRandomSong(songs));
-    bandHeader.addEventListener('click', () => sortSongs(songs, 'band'));
-    titleHeader.addEventListener('click', () => sortSongs(songs, 'title'));
+    DOM.filters.title.addEventListener('input', debounce(() => filterSongs(songs), 300));
+    DOM.randomSongButton.addEventListener('click', () => displayRandomSong(songs));
+    DOM.headers.band.addEventListener('click', () => sortSongs(songs, 'band'));
+    DOM.headers.title.addEventListener('click', () => sortSongs(songs, 'title'));
 }
 
 /**
@@ -101,8 +102,7 @@ function createComparer(key) {
 }
 
 function updateSortIndicators(key) {
-    const songsListHeader = document.getElementById('songs-list-header');
-    songsListHeader.querySelectorAll('th').forEach(header => {
+    DOM.headers.headerRow.querySelectorAll('th').forEach(header => {
         const indicator = header.querySelector('.sort-indicator');
         if (indicator) {
             indicator.className = 'sort-indicator'; // Remove any previous sorting direction
