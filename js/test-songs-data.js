@@ -2,7 +2,7 @@ export const testSongsData = [
     { title: 'Song01', language: 'English', band: 'A band name that is too long to fit here, really really long. Trust me. Is long as hell man. Who came up with this name?', url: 'https://example.com/song1', notes: 'Video of the song https://www.myvideo.com' },
     { title: 'Song02', language: 'Spanish', band: 'Band2', url: 'https://example.com/song2' },
     { title: 'Song03', language: 'French', band: 'Band3', url: 'https://example.com/song3' },
-    { title: 'Song04', language: 'English', band: 'Band2', url: 'https://example.com/song4' },
+    { title: 'Sóng04', language: 'English', band: 'Band2', url: 'https://example.com/song4' },
     { title: 'Song05', language: 'English', band: 'Band1', url: 'https://example.com/song5' },
     { title: 'Song06', language: 'English', band: 'Band3', url: 'https://example.com/song6' },
     { title: 'Song07', language: 'French', band: 'Band2', url: 'https://example.com/song7', notes: 'Another note' },

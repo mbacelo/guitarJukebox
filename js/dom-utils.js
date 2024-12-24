@@ -110,16 +110,24 @@ export function filterSongs(songs) {
     updateSongList(filteredSongs);
 }
 
+function normalizeString(str) {
+    return str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+}
+
 function getFilteredSongs(songs) {
-    const titleSearchValue = DOM.filters.title.value.toLowerCase();
+    const titleSearchValue = normalizeString(DOM.filters.title.value);
     const bandFilterValue = DOM.filters.band.value;
     const languageFilterValue = DOM.filters.language.value;
 
-    const filteredSongs = songs.filter(song => {
-        const matchesTitleSearch = !titleSearchValue || song.title.toLowerCase().includes(titleSearchValue);
+    const filteredSongs = songs.filter(song => {        
         const matchesBandFilter = !bandFilterValue || song.band === bandFilterValue;
         const matchesLanguageFilter = !languageFilterValue || song.language === languageFilterValue;
-        return matchesTitleSearch && matchesBandFilter && matchesLanguageFilter;
+        
+        if(matchesBandFilter && matchesLanguageFilter && titleSearchValue){ //avoid performing search by title if other criteria don't match or if the search input is empty
+            return !titleSearchValue || normalizeString(song.title).includes(titleSearchValue);
+        }
+        
+        return matchesBandFilter && matchesLanguageFilter;
     });
 
     return filteredSongs;
