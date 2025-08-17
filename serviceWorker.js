@@ -17,20 +17,33 @@ self.addEventListener('install', installEvent => {
 
 // Fetch event - cache-first strategy
 self.addEventListener('fetch', event => {
+  // Only handle GET requests for caching
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       // Return the cached response if found      
-       if (cachedResponse) {
-         return cachedResponse;
-       }
+      if (cachedResponse) {
+        return cachedResponse;
+      }
 
       // Otherwise, fetch from the network
       return fetch(event.request).then(networkResponse => {
-        // Cache the new response for future requests
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
-        });
+        // Only cache successful responses
+        if (networkResponse.ok) {
+          // Cache the new response for future requests
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+          });
+        }
+        return networkResponse;
+      }).catch(error => {
+        // Handle fetch errors gracefully
+        console.error('Fetch failed:', error);
+        // You could return a custom offline page here if needed
+        throw error;
       });
     })
   );
