@@ -2,7 +2,7 @@ const CACHE_NAME = 'guitar-jukebox-site-v1.0'
 const resourcesToPrecache = [
   'index.html',
   'css/style.css',
-  'js/api-utils.js',
+  'js/api.js',
   'js/dom-utils.js',
   'js/event-handlers.js'
 ]
