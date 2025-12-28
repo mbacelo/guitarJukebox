@@ -42,8 +42,9 @@ export function updateSongList(songs) {
         // Create and append notes tooltip, if any
         if (song.notes) {
             const songNotes = document.createElement('i');
+            songNotes.className = 'fas fa-info-circle tooltip-icon';
+            songNotes.setAttribute('data-tippy-content', song.notes);
             songLinkCell.appendChild(songNotes);
-            songNotes.outerHTML = `<i class='fas fa-info-circle tooltip-icon' data-tippy-content='${song.notes}'></i>`;
         }
 
         tr.appendChild(songLinkCell);
@@ -84,20 +85,29 @@ export function displayRandomSong(songs) {
         // Force a reflow to restart the animation
         void DOM.randomSongContainer.offsetWidth;
         // Add the random song and the animation class back
-        let tooltipHTML = '';
+        DOM.randomSongContainer.innerHTML = '';
+
+        const songLink = document.createElement('a');
+        songLink.href = randomSong.url;
+        songLink.target = '_blank';
+        songLink.textContent = `${randomSong.title} - ${randomSong.band}`;
+        DOM.randomSongContainer.appendChild(songLink);
+
         if (randomSong.notes) {
-            tooltipHTML = `<i class='fas fa-info-circle tooltip-icon' id='note-tooltip-random-song' data-tippy-content='${randomSong.notes}'></i>`;
+            const tooltipIcon = document.createElement('i');
+            tooltipIcon.className = 'fas fa-info-circle tooltip-icon';
+            tooltipIcon.id = 'note-tooltip-random-song';
+            tooltipIcon.setAttribute('data-tippy-content', randomSong.notes);
+            DOM.randomSongContainer.appendChild(tooltipIcon);
+
+            tippy('#note-tooltip-random-song', {
+                placement: 'bottom-end',
+                arrow: true,
+                interactive: true, // Allows interaction with the tooltip (click, hover, etc.)
+            });
         }
 
-        DOM.randomSongContainer.innerHTML = `<a href='${randomSong.url}' target='_blank'>${randomSong.title} - ${randomSong.band}</a>${tooltipHTML}`;
-
         DOM.randomSongContainer.classList.add('random-song-animation');
-
-        tippy('#note-tooltip-random-song', {
-            placement: 'bottom-end',
-            arrow: true,
-            interactive: true, // Allows interaction with the tooltip (click, hover, etc.)
-        });
     }
 }
 
@@ -176,7 +186,18 @@ function getUniqueValues(objectList, key) {
 
 function getRandomSong(filteredSongs, fullSongsList) {
     const returnedSongsUrlsKey = 'returnedSongsUrls'; // Key for localStorage
-    let returnedSongsUrls = JSON.parse(localStorage.getItem(returnedSongsUrlsKey)) || [];
+    let returnedSongsUrls = [];
+
+    // Try to load from localStorage with error handling
+    try {
+        const stored = localStorage.getItem(returnedSongsUrlsKey);
+        if (stored) {
+            returnedSongsUrls = JSON.parse(stored);
+        }
+    } catch (error) {
+        console.warn('Failed to load from localStorage:', error);
+        returnedSongsUrls = [];
+    }
 
     // If all songs have been returned, reset the returned songs list, and start again
     if (returnedSongsUrls.length === fullSongsList.length) {
@@ -184,11 +205,7 @@ function getRandomSong(filteredSongs, fullSongsList) {
     }
 
     // Find the remaining items
-    //let remainingSongs = filteredSongs.filter(song => !returnedSongsUrls.includes(song.url));
-    let remainingSongs = filteredSongs.filter(song => {
-        let result = !returnedSongsUrls.includes(song.url);
-        return result;
-    });
+    let remainingSongs = filteredSongs.filter(song => !returnedSongsUrls.includes(song.url));
 
     // If there are no new songs to display, but the list is filtered, display any song from the filtered list
     let trackSong = true;
@@ -204,7 +221,11 @@ function getRandomSong(filteredSongs, fullSongsList) {
     if (trackSong) {
         // Update the used items list
         returnedSongsUrls.push(randomSong.url);
-        localStorage.setItem(returnedSongsUrlsKey, JSON.stringify(returnedSongsUrls));
+        try {
+            localStorage.setItem(returnedSongsUrlsKey, JSON.stringify(returnedSongsUrls));
+        } catch (error) {
+            console.warn('Failed to save to localStorage:', error);
+        }
     }
 
     return randomSong;

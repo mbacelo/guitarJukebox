@@ -14,11 +14,23 @@ function isLocalhost() {
 }
 
 async function fetchSongsFromAPI() {
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+    try {
+        const response = await fetch(API_URL, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            throw new Error('Request timeout: The server took too long to respond');
+        }
+        throw error;
     }
-    return await response.json();
 }
 
 async function loadSongsForLocalTesting() {

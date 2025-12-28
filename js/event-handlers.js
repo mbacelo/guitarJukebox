@@ -4,6 +4,7 @@ import { DOM, updateSongList, toggleLoader, displayRandomSong, populateFilterOpt
 const sortKeys = ['band', 'title'];
 let currentSortKey = sortKeys[0];
 let currentSortDirection = 'asc';
+let isAppInitialized = false;
 
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -22,6 +23,12 @@ registerServiceWorker();
  * Initialize the application by loading the songs and setting up event listeners.
  */
 export async function initApp() {
+    if (isAppInitialized) {
+        console.warn('Application already initialized. Skipping duplicate initialization.');
+        return;
+    }
+    isAppInitialized = true;
+
     toggleLoader(true);
     try {
         const songs = await fetchSongs();
@@ -88,14 +95,15 @@ function createComparer(key) {
     return (a, b) => {
         let compareResult = collator.compare(a[key], b[key]) * directionComparer;
 
-        //If sort order is the same,apply additional sorting criteria
+        //If sort order is the same, apply additional sorting criteria
         if (compareResult === 0) {
-            sortKeys.filter((sortKey) => sortKey !== currentSortKey)
-                .forEach((alternativeSortKey) => {
-                    compareResult = collator.compare(a[alternativeSortKey], b[alternativeSortKey])
-                    if (compareResult !== 0)
-                        return compareResult;
-                });
+            const alternateSortKeys = sortKeys.filter((sortKey) => sortKey !== currentSortKey);
+            for (const alternativeSortKey of alternateSortKeys) {
+                compareResult = collator.compare(a[alternativeSortKey], b[alternativeSortKey]);
+                if (compareResult !== 0) {
+                    break;
+                }
+            }
         }
         return compareResult;
     };
