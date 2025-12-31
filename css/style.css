@@ -299,6 +299,7 @@ th {
     cursor: pointer;
     transition: all var(--transition-base);
     user-select: none;
+    white-space: nowrap;
 }
 
 th:hover {
