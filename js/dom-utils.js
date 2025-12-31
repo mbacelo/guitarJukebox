@@ -181,7 +181,7 @@ function populateOptions(selectElement, list) {
 }
 
 function getUniqueValues(objectList, key) {
-    return [...new Set(objectList.map(entity => entity[key]))];
+    return [...new Set(objectList.map(entity => entity[key]))].filter(value => value !== '');
 }
 
 function getRandomSong(filteredSongs, fullSongsList) {
