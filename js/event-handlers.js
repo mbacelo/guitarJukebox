@@ -1,8 +1,8 @@
 import { fetchSongs } from './api.js';
-import { DOM, updateSongList, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs } from './dom-utils.js';
+import { DOM, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs } from './dom-utils.js';
 
 const sortKeys = ['band', 'title'];
-let currentSortKey = sortKeys[0];
+let currentSortKey = null;
 let currentSortDirection = 'asc';
 let isAppInitialized = false;
 
@@ -32,9 +32,10 @@ export async function initApp() {
     toggleLoader(true);
     try {
         const songs = await fetchSongs();
-        updateSongList(songs);
         populateFilterOptions(songs);
         setupEventListeners(songs);
+        // Apply default sort by band ascending
+        sortSongs(songs, 'band');
     } catch (error) {
         console.error('Error fetching songs:', error)
         displayErrorMessage('There was an error loading the songs. Please try again later.');

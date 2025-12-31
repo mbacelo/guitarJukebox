@@ -129,14 +129,19 @@ function getFilteredSongs(songs) {
     const bandFilterValue = DOM.filters.band.value;
     const languageFilterValue = DOM.filters.language.value;
 
-    const filteredSongs = songs.filter(song => {        
+    const filteredSongs = songs.filter(song => {
+        // Skip songs with empty band or title
+        if (!song.band?.trim() || !song.title?.trim()) {
+            return false;
+        }
+
         const matchesBandFilter = !bandFilterValue || song.band === bandFilterValue;
         const matchesLanguageFilter = !languageFilterValue || song.language === languageFilterValue;
-        
+
         if(matchesBandFilter && matchesLanguageFilter && titleSearchValue){ //avoid performing search by title if other criteria don't match or if the search input is empty
             return !titleSearchValue || normalizeString(song.title).includes(titleSearchValue);
         }
-        
+
         return matchesBandFilter && matchesLanguageFilter;
     });
 
