@@ -269,22 +269,13 @@ function getFilteredSongs(songs) {
     const bandFilterValue = DOM.filters.band.value;
     const languageFilterValue = DOM.filters.language.value;
 
-    const filteredSongs = songs.filter(song => {
-        if (!song.band?.trim() || !song.title?.trim()) {
-            return false;
-        }
-
-        const matchesBandFilter = !bandFilterValue || song.band === bandFilterValue;
-        const matchesLanguageFilter = !languageFilterValue || song.language === languageFilterValue;
-
-        if(matchesBandFilter && matchesLanguageFilter && titleSearchValue){
-            return !titleSearchValue || normalizeString(song.title).includes(titleSearchValue);
-        }
-
-        return matchesBandFilter && matchesLanguageFilter;
+    return songs.filter(song => {
+        if (!song.band?.trim() || !song.title?.trim()) return false;
+        if (bandFilterValue && song.band !== bandFilterValue) return false;
+        if (languageFilterValue && song.language !== languageFilterValue) return false;
+        if (titleSearchValue && !normalizeString(song.title).includes(titleSearchValue)) return false;
+        return true;
     });
-
-    return filteredSongs;
 }
 
 /**
@@ -342,28 +333,26 @@ function getRandomSong(filteredSongs, fullSongsList) {
         returnedSongsUrls = [];
     }
 
-    if (returnedSongsUrls.length === fullSongsList.length) {
+    if (returnedSongsUrls.length >= fullSongsList.length) {
         returnedSongsUrls = [];
     }
 
     let remainingSongs = filteredSongs.filter(song => !returnedSongsUrls.includes(song.url));
 
-    let trackSong = true;
-    if (remainingSongs.length === 0 && filteredSongs.length < fullSongsList.length) {
+    if (remainingSongs.length === 0) {
+        const filteredUrls = new Set(filteredSongs.map(song => song.url));
+        returnedSongsUrls = returnedSongsUrls.filter(url => !filteredUrls.has(url));
         remainingSongs = filteredSongs;
-        trackSong = false;
     }
 
     const randomIndex = Math.floor(Math.random() * remainingSongs.length);
     const randomSong = remainingSongs[randomIndex];
 
-    if (trackSong) {
-        returnedSongsUrls.push(randomSong.url);
-        try {
-            localStorage.setItem(returnedSongsUrlsKey, JSON.stringify(returnedSongsUrls));
-        } catch (error) {
-            console.warn('Failed to save to localStorage:', error);
-        }
+    returnedSongsUrls.push(randomSong.url);
+    try {
+        localStorage.setItem(returnedSongsUrlsKey, JSON.stringify(returnedSongsUrls));
+    } catch (error) {
+        console.warn('Failed to save to localStorage:', error);
     }
 
     return randomSong;

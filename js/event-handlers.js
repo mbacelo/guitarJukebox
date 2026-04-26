@@ -17,8 +17,6 @@ function registerServiceWorker() {
     }
 }
 
-registerServiceWorker();
-
 /**
  * Initialize the application by loading the songs and setting up event listeners.
  */
@@ -29,6 +27,7 @@ export async function initApp() {
     }
     isAppInitialized = true;
 
+    registerServiceWorker();
     toggleLoader(true);
     try {
         const songs = await fetchSongs();
