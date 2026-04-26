@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/dist/tippy.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json" />
 
@@ -40,41 +40,58 @@
 
 <body>
     <header>
-        <h1>Guitar Jukebox <i class="fa-solid fa-guitar app-icon"></i></h1>
+        <h1>Guitar Jukebox <i class="fa-solid fa-guitar app-icon" aria-hidden="true"></i></h1>
+        <button id="share-app-button" type="button" class="share-app-button" aria-label="Share this app on WhatsApp">
+            <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+            Share app
+        </button>
     </header>
     <main>
         <section class="filter">
             <div>
-                <label for="language-filter">Language:</label>
+                <label for="language-filter">
+                    <i class="fa-solid fa-globe label-icon" aria-hidden="true"></i>
+                    Language
+                </label>
                 <select id="language-filter" class="filter-selector">
                     <option value="">All</option>
                 </select>
             </div>
             <div>
-                <label for="band-filter">Band:</label>
+                <label for="band-filter">
+                    <i class="fa-solid fa-microphone-lines label-icon" aria-hidden="true"></i>
+                    Band
+                </label>
                 <select id="band-filter" class="filter-selector">
                     <option value="">All</option>
                 </select>
             </div>
             <div>
-                <label for="title-search">Song Title:</label>
-                <input type="search" id="title-search" placeholder="Enter song title" class="filter-selector">
+                <label for="title-search">
+                    <i class="fa-solid fa-magnifying-glass label-icon" aria-hidden="true"></i>
+                    Title
+                </label>
+                <input type="search" id="title-search" placeholder="Search by title…" class="filter-selector">
             </div>
         </section>
         <section class="random-song-section">
-            <button id="random-song-button" class="random-song-button">Pick a Random Song</button>
+            <button id="random-song-button" class="random-song-button">
+                <i class="fa-solid fa-music button-icon" aria-hidden="true"></i>
+                Pick a Random Song
+            </button>
             <div id="random-song-container" class="random-song-container"></div>
         </section>
         <section class="table-container">
             <div id="loader" class="song-list-loader">
                 <div class="loader-spinner"></div>
-                <h3>Loading songs...</h3>
+                <h3>Loading songs…</h3>
             </div>
             <table>
                 <thead>
                     <tr id="songs-list-header">
-                        <th id="band-header">Band <span class="sort-indicator sort-asc"></span></th>
-                        <th id="title-header">Song Title <span class="sort-indicator"></span></th>
+                        <th id="band-header" class="col-band">Band <span class="sort-indicator sort-asc"></span></th>
+                        <th id="title-header" class="col-title">Song Title <span class="sort-indicator"></span></th>
+                        <th class="col-share" aria-label="Share"></th>
                     </tr>
                 </thead>
                 <tbody id="song-list">

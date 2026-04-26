@@ -1,5 +1,5 @@
 import { fetchSongs } from './api.js';
-import { DOM, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs } from './dom-utils.js';
+import { DOM, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs, setOnClearFilters, shareAppOnWhatsApp } from './dom-utils.js';
 
 const sortKeys = ['band', 'title'];
 let currentSortKey = null;
@@ -50,7 +50,7 @@ export async function initApp() {
  * @param {string} message - The error message to display.
  */
 function displayErrorMessage(message) {
-    DOM.songList.innerHTML = `<tr><td colspan='2' style='text-align: center; color: red;'>${message}</td></tr>`;
+    DOM.songList.innerHTML = `<tr><td colspan='3' style='text-align: center; color: var(--error);'>${message}</td></tr>`;
 }
 
 /**
@@ -67,6 +67,15 @@ function setupEventListeners(songs) {
     DOM.randomSongButton.addEventListener('click', () => displayRandomSong(songs));
     DOM.headers.band.addEventListener('click', () => sortSongs(songs, 'band'));
     DOM.headers.title.addEventListener('click', () => sortSongs(songs, 'title'));
+    DOM.shareAppButton.addEventListener('click', shareAppOnWhatsApp);
+
+    setOnClearFilters(() => {
+        DOM.filters.language.value = '';
+        DOM.filters.band.value = '';
+        DOM.filters.title.value = '';
+        updateBandFilter(songs);
+        filterSongs(songs);
+    });
 }
 
 /**
@@ -113,9 +122,8 @@ function createComparer(key) {
 function updateSortIndicators(key) {
     DOM.headers.headerRow.querySelectorAll('th').forEach(header => {
         const indicator = header.querySelector('.sort-indicator');
-        if (indicator) {
-            indicator.className = 'sort-indicator'; // Remove any previous sorting direction
-        }
+        if (!indicator) return;
+        indicator.className = 'sort-indicator';
         if (header.id === `${key}-header`) {
             indicator.classList.add(`sort-${currentSortDirection}`);
         }
