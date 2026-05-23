@@ -1,10 +1,11 @@
 import { fetchSongs } from './api.js';
-import { DOM, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs, setOnClearFilters, shareAppOnWhatsApp, initBandCombobox, setOnBandFilterChange, setBandFilterValue } from './dom-utils.js';
+import { DOM, toggleLoader, populateFilterOptions, updateBandFilter, filterSongs, setOnClearFilters, shareAppOnWhatsApp } from './dom-utils.js';
+import { initBandCombobox, setOnBandFilterChange, setBandFilterValue } from './band-combobox.js';
+import { displayRandomSong } from './random-song.js';
 
 const sortKeys = ['band', 'title'];
 let currentSortKey = null;
 let currentSortDirection = 'asc';
-let isAppInitialized = false;
 
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -17,23 +18,13 @@ function registerServiceWorker() {
     }
 }
 
-/**
- * Initialize the application by loading the songs and setting up event listeners.
- */
 export async function initApp() {
-    if (isAppInitialized) {
-        console.warn('Application already initialized. Skipping duplicate initialization.');
-        return;
-    }
-    isAppInitialized = true;
-
     registerServiceWorker();
     toggleLoader(true);
     try {
         const songs = await fetchSongs();
         populateFilterOptions(songs);
         setupEventListeners(songs);
-        // Apply default sort by band ascending
         sortSongs(songs, 'band');
     } catch (error) {
         console.error('Error fetching songs:', error)
@@ -44,18 +35,18 @@ export async function initApp() {
     }
 }
 
-/**
- * Display an error message on the page.
- * @param {string} message - The error message to display.
- */
 function displayErrorMessage(message) {
-    DOM.songList.innerHTML = `<tr><td colspan='3' style='text-align: center; color: var(--error);'>${message}</td></tr>`;
+    DOM.songList.innerHTML = '';
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 3;
+    cell.style.textAlign = 'center';
+    cell.style.color = 'var(--error)';
+    cell.textContent = message;
+    row.appendChild(cell);
+    DOM.songList.appendChild(row);
 }
 
-/**
- * Set up event listeners for the application.
- * @param {Array} songs - Array of song objects.
- */
 function setupEventListeners(songs) {
     initBandCombobox();
     setOnBandFilterChange(() => filterSongs(songs));
@@ -78,11 +69,6 @@ function setupEventListeners(songs) {
     });
 }
 
-/**
- * Sort the songs array based on the selected column and update the song list.
- * @param {Array} songs - Array of song objects.
- * @param {string} key - The key to sort by (e.g., 'band', 'title').
- */
 function sortSongs(songs, key) {
     updateSortDirection(key);
     songs.sort(createComparer(key));
@@ -101,21 +87,17 @@ function updateSortDirection(key) {
 
 function createComparer(key) {
     const collator = new Intl.Collator(undefined, { sensitivity: 'base' });
-    const directionComparer = currentSortDirection === 'asc' ? 1 : -1;
+    const directionMultiplier = currentSortDirection === 'asc' ? 1 : -1;
     return (a, b) => {
-        let compareResult = collator.compare(a[key], b[key]) * directionComparer;
+        let result = collator.compare(a[key], b[key]) * directionMultiplier;
+        if (result !== 0) return result;
 
-        //If sort order is the same, apply additional sorting criteria
-        if (compareResult === 0) {
-            const alternateSortKeys = sortKeys.filter((sortKey) => sortKey !== currentSortKey);
-            for (const alternativeSortKey of alternateSortKeys) {
-                compareResult = collator.compare(a[alternativeSortKey], b[alternativeSortKey]);
-                if (compareResult !== 0) {
-                    break;
-                }
-            }
+        // Tiebreaker: compare on the other sort key(s)
+        for (const altKey of sortKeys.filter(k => k !== currentSortKey)) {
+            result = collator.compare(a[altKey], b[altKey]);
+            if (result !== 0) return result;
         }
-        return compareResult;
+        return result;
     };
 }
 
@@ -130,12 +112,6 @@ function updateSortIndicators(key) {
     });
 }
 
-/**
- * Debounce a function to prevent it from being called too frequently.
- * @param {Function} func - The function to debounce.
- * @param {number} delay - The debounce delay in milliseconds.
- * @returns {Function} - The debounced function.
- */
 function debounce(func, delay) {
     let debounceTimer;
     return function () {

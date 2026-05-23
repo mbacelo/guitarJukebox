@@ -10,23 +10,32 @@ Guitar Jukebox is a Progressive Web App (PWA) for managing and displaying a cura
 
 ### Module Structure
 
-The codebase follows an ES6 module pattern with three core JavaScript modules:
+The codebase follows an ES6 module pattern. The HTML loads `event-handlers.js` and calls `initApp()`; the rest of the modules are pulled in via the import graph.
 
 - **api.js**: Data fetching layer
   - Fetches songs from Google Apps Script API in production
-  - Uses test data from `test-songs-data.js` when running on localhost
+  - On localhost, dynamically imports `test-songs-data.js` (test data is not shipped in production loads)
   - API URL: `https://script.google.com/macros/s/AKfycbyYOOuMhFxVgppb_ZmnsB4MgbVfDuxR0WMdKfoN-BbFD1cHSFq75mupaP6yz9PXHspc/exec`
 
-- **dom-utils.js**: DOM manipulation and UI updates
+- **dom-utils.js**: Rendering + shared filter/render helpers
   - Exports the `DOM` object containing all DOM element references
-  - Handles song list rendering, filtering logic, and random song selection
-  - Manages tooltips via Tippy.js for song notes
-  - Implements accent-insensitive search using Unicode normalization
+  - Song list rendering, empty state, language filter, share button factory
+  - `getFilteredSongs` / `filterSongs` (reads filter values, returns filtered songs)
+  - `normalizeString` (NFD + diacritic strip) for accent-insensitive search
+  - `initializeTooltip` wraps Tippy.js setup
+
+- **band-combobox.js**: The searchable band-filter combobox
+  - Self-contained component with its own keyboard nav and option list
+  - Exposes `initBandCombobox`, `setBandFilterValue`, `getBandFilterValue`, `setBandOptions`, `setOnBandFilterChange`
+
+- **random-song.js**: Random song picker
+  - Renders the random-song card
+  - Tracks shown songs in localStorage (key: `returnedSongsUrls`) to avoid repetition
 
 - **event-handlers.js**: Application initialization and event management
   - Entry point via `initApp()` function
   - Registers service worker for PWA functionality
-  - Sets up event listeners for filters, search, sorting, and random song selection
+  - Wires up filter, search, sort, and random-song event listeners
   - Implements sorting with Intl.Collator for locale-aware comparisons
   - Uses debouncing (300ms) for the title search input
 
@@ -72,10 +81,9 @@ Each song object has the following structure:
 - Secondary sort by alternate column when primary values match
 
 **Service Worker**:
-- Caches static resources (HTML, CSS, JS) for offline access
-- Cache-first strategy for GET requests only
-- POST requests bypass caching (important for API calls)
-- Cache version: `guitar-jukebox-site-v1.0`
+- Minimal pass-through service worker (no caching of its own)
+- Exists solely to make the app installable as a PWA
+- All fetches go to the network; the browser's HTTP cache handles caching
 
 ## Development
 
@@ -95,22 +103,13 @@ npx serve
 
 To test with different scenarios, modify `test-songs-data.js`. The test data includes edge cases like long band names and special characters.
 
-### Service Worker Updates
-
-When updating cached resources:
-1. Update the `CACHE_NAME` version in `serviceWorker.js`
-2. Update the `resourcesToPrecache` array if files change
-3. The activate event will automatically clean up old caches
-
 ### Important Implementation Notes
 
-- **POST Request Handling**: The service worker explicitly skips caching for non-GET requests (serviceWorker.js:21-23). This prevents caching of POST requests to the Google Apps Script API.
+- **Unicode Normalization**: The search uses NFD normalization and removes diacritics (`normalizeString` in `dom-utils.js`) to enable accent-insensitive matching.
 
-- **Unicode Normalization**: The search uses NFD normalization and removes diacritics (dom-utils.js:114) to enable accent-insensitive matching.
+- **LocalStorage Usage**: The random song feature stores returned song URLs in localStorage under the key `returnedSongsUrls` (see `random-song.js`).
 
-- **LocalStorage Usage**: The random song feature stores returned song URLs in localStorage under the key `returnedSongsUrls`.
-
-- **Filter Dependencies**: The language filter change triggers both band filter update and song filtering (event-handlers.js:54-57). This ensures band options are always relevant to the selected language.
+- **Filter Dependencies**: The language filter change triggers both band filter update and song filtering. This ensures band options are always relevant to the selected language.
 
 ## External Dependencies
 
