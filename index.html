@@ -58,13 +58,26 @@
                 </select>
             </div>
             <div>
-                <label for="band-filter">
+                <label for="band-filter-input">
                     <i class="fa-solid fa-microphone-lines label-icon" aria-hidden="true"></i>
                     Band
                 </label>
-                <select id="band-filter" class="filter-selector">
-                    <option value="">All</option>
-                </select>
+                <div id="band-filter" class="combobox filter-selector">
+                    <input
+                        type="text"
+                        id="band-filter-input"
+                        class="combobox-input"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="false"
+                        aria-controls="band-filter-list"
+                        autocomplete="off"
+                        value="All">
+                    <button type="button" class="combobox-clear" aria-label="Clear band filter" tabindex="-1">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                    <ul id="band-filter-list" class="combobox-list" role="listbox" hidden></ul>
+                </div>
             </div>
             <div>
                 <label for="title-search">

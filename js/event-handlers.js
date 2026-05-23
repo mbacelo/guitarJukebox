@@ -1,5 +1,5 @@
 import { fetchSongs } from './api.js';
-import { DOM, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs, setOnClearFilters, shareAppOnWhatsApp } from './dom-utils.js';
+import { DOM, toggleLoader, displayRandomSong, populateFilterOptions, updateBandFilter, filterSongs, setOnClearFilters, shareAppOnWhatsApp, initBandCombobox, setOnBandFilterChange, setBandFilterValue } from './dom-utils.js';
 
 const sortKeys = ['band', 'title'];
 let currentSortKey = null;
@@ -57,7 +57,8 @@ function displayErrorMessage(message) {
  * @param {Array} songs - Array of song objects.
  */
 function setupEventListeners(songs) {
-    DOM.filters.band.addEventListener('change', () => filterSongs(songs));
+    initBandCombobox();
+    setOnBandFilterChange(() => filterSongs(songs));
     DOM.filters.language.addEventListener('change', () => {
         updateBandFilter(songs);
         filterSongs(songs);
@@ -70,7 +71,7 @@ function setupEventListeners(songs) {
 
     setOnClearFilters(() => {
         DOM.filters.language.value = '';
-        DOM.filters.band.value = '';
+        setBandFilterValue('');
         DOM.filters.title.value = '';
         updateBandFilter(songs);
         filterSongs(songs);

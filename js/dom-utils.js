@@ -9,6 +9,9 @@ export const DOM = {
     filters: {
         language: document.getElementById('language-filter'),
         band: document.getElementById('band-filter'),
+        bandInput: document.getElementById('band-filter-input'),
+        bandList: document.getElementById('band-filter-list'),
+        bandClear: document.querySelector('#band-filter .combobox-clear'),
         title: document.getElementById('title-search')
     },
     headers: {
@@ -266,7 +269,7 @@ function normalizeString(str) {
 
 function getFilteredSongs(songs) {
     const titleSearchValue = normalizeString(DOM.filters.title.value);
-    const bandFilterValue = DOM.filters.band.value;
+    const bandFilterValue = getBandFilterValue();
     const languageFilterValue = DOM.filters.language.value;
 
     return songs.filter(song => {
@@ -295,7 +298,169 @@ export function updateBandFilter(songs) {
     });
     uniqueBands.sort();
 
-    populateOptions(DOM.filters.band, uniqueBands);
+    setBandOptions(uniqueBands);
+
+    const currentBand = getBandFilterValue();
+    if (currentBand && !uniqueBands.includes(currentBand)) {
+        setBandFilterValue('');
+    }
+}
+
+let bandOptions = [];
+let bandHighlightedIndex = -1;
+let onBandFilterChange = null;
+
+export function setOnBandFilterChange(handler) {
+    onBandFilterChange = handler;
+}
+
+function setBandOptions(bands) {
+    bandOptions = bands;
+}
+
+export function getBandFilterValue() {
+    return DOM.filters.bandInput.dataset.value || '';
+}
+
+export function setBandFilterValue(value) {
+    DOM.filters.bandInput.dataset.value = value;
+    DOM.filters.bandInput.value = value || 'All';
+    DOM.filters.band.classList.toggle('has-value', !!value);
+}
+
+export function initBandCombobox() {
+    const input = DOM.filters.bandInput;
+    const list = DOM.filters.bandList;
+    const clear = DOM.filters.bandClear;
+    const container = DOM.filters.band;
+
+    const open = () => {
+        const query = getBandFilterValue() ? input.value : '';
+        renderBandList(query);
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+        container.classList.add('is-open');
+    };
+
+    const close = () => {
+        list.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+        container.classList.remove('is-open', 'is-typing');
+        bandHighlightedIndex = -1;
+        const selected = getBandFilterValue();
+        input.value = selected || 'All';
+    };
+
+    const commit = (value) => {
+        setBandFilterValue(value);
+        close();
+        if (typeof onBandFilterChange === 'function') onBandFilterChange();
+    };
+
+    input.addEventListener('focus', () => {
+        open();
+        input.select();
+    });
+    input.addEventListener('click', () => {
+        open();
+        input.select();
+    });
+
+    input.addEventListener('input', () => {
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+        container.classList.add('is-open');
+        container.classList.toggle('is-typing', input.value.length > 0);
+        bandHighlightedIndex = -1;
+        renderBandList(input.value);
+    });
+
+    input.addEventListener('keydown', (event) => {
+        const visible = !list.hidden;
+        const items = list.querySelectorAll('.combobox-option');
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (!visible) { open(); return; }
+            bandHighlightedIndex = Math.min(items.length - 1, bandHighlightedIndex + 1);
+            updateHighlight(items);
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            if (!visible) { open(); return; }
+            bandHighlightedIndex = Math.max(0, bandHighlightedIndex - 1);
+            updateHighlight(items);
+        } else if (event.key === 'Enter') {
+            if (!visible) return;
+            event.preventDefault();
+            if (bandHighlightedIndex >= 0 && items[bandHighlightedIndex]) {
+                commit(items[bandHighlightedIndex].dataset.value);
+            }
+        } else if (event.key === 'Escape') {
+            if (visible) {
+                event.preventDefault();
+                close();
+            }
+        }
+    });
+
+    clear.addEventListener('click', (event) => {
+        event.preventDefault();
+        commit('');
+        input.focus();
+    });
+
+    list.addEventListener('mousedown', (event) => {
+        const option = event.target.closest('.combobox-option');
+        if (!option) return;
+        event.preventDefault();
+        commit(option.dataset.value);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!container.contains(event.target)) close();
+    });
+}
+
+function updateHighlight(items) {
+    items.forEach((item, index) => {
+        item.classList.toggle('is-highlighted', index === bandHighlightedIndex);
+        if (index === bandHighlightedIndex) {
+            item.scrollIntoView({ block: 'nearest' });
+        }
+    });
+}
+
+function renderBandList(query) {
+    const list = DOM.filters.bandList;
+    const normalizedQuery = normalizeString(query);
+    const matches = bandOptions.filter(band => normalizeString(band).includes(normalizedQuery));
+
+    list.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    const allOption = document.createElement('li');
+    allOption.className = 'combobox-option combobox-option--all';
+    allOption.dataset.value = '';
+    allOption.setAttribute('role', 'option');
+    allOption.textContent = 'All';
+    fragment.appendChild(allOption);
+
+    if (matches.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'combobox-empty';
+        empty.textContent = 'No matches';
+        fragment.appendChild(empty);
+    } else {
+        matches.forEach(band => {
+            const option = document.createElement('li');
+            option.className = 'combobox-option';
+            option.dataset.value = band;
+            option.setAttribute('role', 'option');
+            option.textContent = band;
+            fragment.appendChild(option);
+        });
+    }
+
+    list.appendChild(fragment);
 }
 
 function updateLanguageFilter(songs) {
