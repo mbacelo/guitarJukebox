@@ -89,7 +89,7 @@ Each song object has the following structure:
 
 ### Local Development
 
-The app automatically detects localhost and uses test data from `test-songs-data.js` instead of making API calls. Simply open `index.html` in a browser or use a local server:
+The app automatically detects localhost and uses test data from `test-songs-data.js` instead of making API calls. A local server is required (ES modules and the localhost detection don't work over `file://`):
 
 ```bash
 # Using Python
@@ -113,10 +113,12 @@ To test with different scenarios, modify `test-songs-data.js`. The test data inc
 
 ## External Dependencies
 
-- **Font Awesome 6.6.0**: Icons (guitar icon, info tooltips)
+- **Font Awesome 7.0.1**: Icons (guitar icon, info tooltips)
 - **Tippy.js 6**: Tooltip functionality for song notes
 - **Google Tag Manager**: Analytics (ID: GTM-NHZZZX6T)
 - **Popper.js**: Tooltip positioning (Tippy.js dependency)
+
+CDN `<link>`/`<script>` tags use pinned versions with SRI (`integrity` + `crossorigin`) attributes. When bumping a version, recompute the hash: `curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A`.
 
 ## Deployment
 

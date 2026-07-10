@@ -3,7 +3,9 @@ const API_TIMEOUT_MS = 10000;
 
 export async function fetchSongs() {
     if (isLocalhost()) {
-        const { testSongsData } = await import('./test-songs-data.js');
+        // Cache-busting query: browsers cache a *failed* dynamic import in the
+        // module map, which would make the Retry button a dead end in dev
+        const { testSongsData } = await import(`./test-songs-data.js?t=${Date.now()}`);
         return new Promise(resolve => setTimeout(() => resolve(testSongsData), 500));
     }
     return fetchSongsFromAPI();

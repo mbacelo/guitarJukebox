@@ -61,7 +61,7 @@ export function displayRandomSong(songs) {
     const actions = document.createElement('div');
     actions.className = 'card-actions';
 
-    const shareButton = createShareButton(randomSong, `Share "${randomSong.title}" by ${randomSong.band} on WhatsApp`, { labeled: true });
+    const shareButton = createShareButton(randomSong, `Share "${randomSong.title}" by ${randomSong.band}`, { labeled: true });
     actions.appendChild(shareButton);
 
     meta.appendChild(actions);

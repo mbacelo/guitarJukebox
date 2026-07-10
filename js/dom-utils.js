@@ -6,6 +6,7 @@ export const DOM = {
     randomSongButton: document.getElementById('random-song-button'),
     shareAppButton: document.getElementById('share-app-button'),
     loader: document.getElementById('loader'),
+    songCount: document.getElementById('song-count'),
     tableContainer: document.querySelector('.table-container'),
     songTable: document.querySelector('.table-container table'),
     filters: {
@@ -25,8 +26,18 @@ export const DOM = {
 
 const APP_URL = 'https://mbacelo.github.io/guitarJukebox';
 
-export function shareAppOnWhatsApp() {
-    openWhatsApp(APP_URL);
+export function shareApp() {
+    shareLink(APP_URL);
+}
+
+function shareLink(link) {
+    if (navigator.share) {
+        navigator.share({ url: link }).catch(error => {
+            if (error.name !== 'AbortError') openWhatsApp(link);
+        });
+        return;
+    }
+    openWhatsApp(link);
 }
 
 function openWhatsApp(message) {
@@ -39,12 +50,12 @@ export function createShareButton(song, label, { labeled = false } = {}) {
     button.type = 'button';
     button.className = labeled ? 'share-song-button share-song-button--labeled' : 'share-song-button';
     button.setAttribute('aria-label', label);
-    const icon = '<i class="fa-brands fa-whatsapp" aria-hidden="true"></i>';
+    const icon = '<i class="fa-solid fa-share-nodes" aria-hidden="true"></i>';
     button.innerHTML = labeled ? `${icon}Share song` : icon;
     button.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
-        openWhatsApp(song.url);
+        shareLink(song.url);
     });
     return button;
 }
@@ -58,6 +69,9 @@ export function setOnClearFilters(handler) {
 
 export function updateSongList(songs) {
     DOM.songList.innerHTML = '';
+
+    updateSongCount(songs.length);
+    DOM.randomSongButton.disabled = songs.length === 0;
 
     if (songs.length === 0) {
         renderEmptyState();
@@ -96,7 +110,7 @@ export function updateSongList(songs) {
 
         const shareCell = document.createElement('td');
         shareCell.className = 'cell-share';
-        const shareButton = createShareButton(song, `Share "${song.title}" by ${song.band} on WhatsApp`);
+        const shareButton = createShareButton(song, `Share "${song.title}" by ${song.band}`);
         shareCell.appendChild(shareButton);
         tr.appendChild(shareCell);
 
@@ -105,7 +119,12 @@ export function updateSongList(songs) {
 
     DOM.songList.appendChild(fragment);
 
-    initializeTooltip('.tooltip-icon');
+    initializeTooltip('#song-list .tooltip-icon');
+}
+
+function updateSongCount(count) {
+    if (!DOM.songCount) return;
+    DOM.songCount.textContent = count === 1 ? '1 song' : `${count} songs`;
 }
 
 function renderEmptyState() {

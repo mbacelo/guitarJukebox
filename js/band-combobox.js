@@ -39,6 +39,7 @@ export function initBandCombobox() {
     const close = () => {
         list.hidden = true;
         input.setAttribute('aria-expanded', 'false');
+        input.removeAttribute('aria-activedescendant');
         container.classList.remove('is-open', 'is-typing');
         highlightedIndex = -1;
         input.value = getBandFilterValue() || 'All';
@@ -59,6 +60,7 @@ export function initBandCombobox() {
         container.classList.add('is-open');
         container.classList.toggle('is-typing', input.value.length > 0);
         highlightedIndex = -1;
+        input.removeAttribute('aria-activedescendant');
         renderList(input.value);
     });
 
@@ -80,9 +82,21 @@ export function initBandCombobox() {
             event.preventDefault();
             if (highlightedIndex >= 0 && items[highlightedIndex]) {
                 commit(items[highlightedIndex].dataset.value);
+                return;
+            }
+            // No highlight: commit the top match if the user has typed a query
+            const topMatch = container.classList.contains('is-typing')
+                ? list.querySelector('.combobox-option:not(.combobox-option--all)')
+                : null;
+            if (topMatch) {
+                commit(topMatch.dataset.value);
+            } else {
+                close();
             }
         } else if (event.key === 'Escape' && visible) {
             event.preventDefault();
+            close();
+        } else if (event.key === 'Tab' && visible) {
             close();
         }
     });
@@ -106,10 +120,13 @@ export function initBandCombobox() {
 }
 
 function updateHighlight(items) {
+    const input = DOM.filters.bandInput;
+    input.removeAttribute('aria-activedescendant');
     items.forEach((item, index) => {
         item.classList.toggle('is-highlighted', index === highlightedIndex);
         if (index === highlightedIndex) {
             item.scrollIntoView({ block: 'nearest' });
+            input.setAttribute('aria-activedescendant', item.id);
         }
     });
 }
@@ -122,10 +139,14 @@ function renderList(query) {
     list.innerHTML = '';
     const fragment = document.createDocumentFragment();
 
+    const selectedValue = getBandFilterValue();
+
     const allOption = document.createElement('li');
     allOption.className = 'combobox-option combobox-option--all';
+    allOption.id = 'band-option-all';
     allOption.dataset.value = '';
     allOption.setAttribute('role', 'option');
+    allOption.setAttribute('aria-selected', String(selectedValue === ''));
     allOption.textContent = 'All';
     fragment.appendChild(allOption);
 
@@ -135,11 +156,13 @@ function renderList(query) {
         empty.textContent = 'No matches';
         fragment.appendChild(empty);
     } else {
-        matches.forEach(band => {
+        matches.forEach((band, index) => {
             const option = document.createElement('li');
             option.className = 'combobox-option';
+            option.id = `band-option-${index}`;
             option.dataset.value = band;
             option.setAttribute('role', 'option');
+            option.setAttribute('aria-selected', String(band === selectedValue));
             option.textContent = band;
             fragment.appendChild(option);
         });

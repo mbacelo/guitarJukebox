@@ -5,8 +5,12 @@
     <meta charset="UTF-8">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/dist/tippy.css">
+    <meta name="theme-color" content="#b45309">
+    <link rel="apple-touch-icon" href="images/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha384-rWj9FmWWt3OMqd9vBkWRhFavvVUYalYqGPoMdL1brs/qvvqz88gvLShYa4hKNyqb" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/dist/tippy.css"
+        integrity="sha384-IBgYl+I5X6ZDZXI5zv1vsSE3VopDomz4BxSu/GlxaPHfFtcrJ3uj70z1w6srO9zU" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,8 +45,8 @@
 <body>
     <header>
         <h1>Guitar Jukebox <i class="fa-solid fa-guitar app-icon" aria-hidden="true"></i></h1>
-        <button id="share-app-button" type="button" class="share-app-button" aria-label="Share this app on WhatsApp">
-            <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+        <button id="share-app-button" type="button" class="share-app-button" aria-label="Share this app">
+            <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
             <span class="share-app-button-text">Share app</span>
         </button>
     </header>
@@ -92,9 +96,11 @@
                 <i class="fa-solid fa-music button-icon" aria-hidden="true"></i>
                 Pick a Random Song
             </button>
-            <div id="random-song-container" class="random-song-container"></div>
+            <div id="random-song-container" class="random-song-container" aria-live="polite"></div>
         </section>
-        <section class="table-container">
+        <section class="song-list-section">
+            <p id="song-count" class="song-count" aria-live="polite"></p>
+            <div class="table-container">
             <div id="loader" class="song-list-loader">
                 <div class="loader-spinner"></div>
                 <h3>Loading songs…</h3>
@@ -102,8 +108,12 @@
             <table>
                 <thead>
                     <tr id="songs-list-header">
-                        <th id="band-header" class="col-band">Band <span class="sort-indicator"></span></th>
-                        <th id="title-header" class="col-title">Song Title <span class="sort-indicator"></span></th>
+                        <th id="band-header" class="col-band">
+                            <button type="button" class="sort-button">Band <span class="sort-indicator"></span></button>
+                        </th>
+                        <th id="title-header" class="col-title">
+                            <button type="button" class="sort-button">Song Title <span class="sort-indicator"></span></button>
+                        </th>
                         <th class="col-share" aria-label="Share"></th>
                     </tr>
                 </thead>
@@ -111,12 +121,15 @@
                     <!-- Songs will be dynamically populated here -->
                 </tbody>
             </table>
+            </div>
         </section>
     </main>
 
     <!-- Tippy.js JS -->
-    <script src="https://unpkg.com/@popperjs/core@2.11.8"></script>
-    <script src="https://unpkg.com/tippy.js@6.3.7"></script>
+    <script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js"
+        integrity="sha384-AiTRpehQ7zqeua0Ypfa6Q4ki/ddhczZxrKtiQbTQUlJIhBkTeyoZP9/W/5ulFt29" crossorigin="anonymous"></script>
 
     <script type="module">
         import { initApp } from './js/event-handlers.js';
